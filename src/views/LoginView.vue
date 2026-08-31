@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import BaseInput from '../components/ui/BaseInput.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
+import AppLogo from '../components/AppLogo.vue'
+import DarkModeToggle from '../components/layout/DarkModeToggle.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -26,9 +28,13 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-white p-4 dark:bg-slate-950">
+  <div class="relative flex min-h-screen items-center justify-center bg-white p-4 dark:bg-slate-950">
+    <DarkModeToggle class="absolute right-4 top-4" />
     <form class="w-full max-w-sm space-y-4" @submit.prevent="handleSubmit">
-      <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Log in</h1>
+      <div class="flex justify-center">
+        <AppLogo />
+      </div>
+      <h1 class="text-center text-xl font-semibold text-slate-900 dark:text-slate-100">Log in</h1>
       <BaseInput v-model="email" type="email" label="Email" required />
       <BaseInput v-model="password" type="password" label="Password" required />
       <p v-if="auth.error" class="text-sm text-red-600 dark:text-red-400">{{ auth.error }}</p>
