@@ -39,26 +39,30 @@ const dateRangeOptions = [
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-3">
+  <div class="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
     <BaseSelect
+      class="w-full sm:w-auto"
       :model-value="filters.status"
       label="Status"
       :options="statusOptions"
       @update:model-value="update('status', $event)"
     />
     <BaseSelect
+      class="w-full sm:w-auto"
       :model-value="filters.priority"
       label="Priority"
       :options="priorityOptions"
       @update:model-value="update('priority', $event)"
     />
     <BaseSelect
+      class="w-full sm:w-auto"
       :model-value="filters.categoryId"
       label="Category"
       :options="[{ value: 'all', label: 'All categories' }, ...categories.map((c) => ({ value: c.id, label: c.name }))]"
       @update:model-value="update('categoryId', $event)"
     />
     <BaseSelect
+      class="w-full sm:w-auto"
       :model-value="filters.dateRange"
       label="Due"
       :options="dateRangeOptions"
@@ -66,12 +70,14 @@ const dateRangeOptions = [
     />
     <template v-if="filters.dateRange === 'custom'">
       <BaseInput
+        class="w-full sm:w-auto"
         type="date"
         label="From"
         :model-value="filters.customStart"
         @update:model-value="update('customStart', $event)"
       />
       <BaseInput
+        class="w-full sm:w-auto"
         type="date"
         label="To"
         :model-value="filters.customEnd"
@@ -79,6 +85,7 @@ const dateRangeOptions = [
       />
     </template>
     <BaseSelect
+      class="w-full sm:w-auto"
       :model-value="filters.sortBy"
       label="Sort by"
       :options="sortOptions"

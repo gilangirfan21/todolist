@@ -26,6 +26,9 @@ const localTodos = computed({
     tag="ul"
     class="space-y-2"
     :disabled="!reorderable"
+    :delay="150"
+    :delay-on-touch-only="true"
+    :touch-start-threshold="5"
   >
     <template #item="{ element }">
       <TodoItem

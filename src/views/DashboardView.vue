@@ -9,6 +9,7 @@ import TodoForm from '../components/todo/TodoForm.vue'
 import CategoryManager from '../components/todo/CategoryManager.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
+import ConfirmDialog from '../components/ui/ConfirmDialog.vue'
 import { todayStr, weekRange, monthRange } from '../lib/date'
 import { todosToCsv, downloadCsv } from '../lib/csv'
 
@@ -100,11 +101,24 @@ async function handleSubmit(payload) {
   isModalOpen.value = false
 }
 
-async function handleDelete(todo) {
-  if (confirm(`Delete "${todo.title}"?`)) {
-    await todoStore.removeTodo(todo.id)
+const deleteTarget = ref(null)
+const isDeleteModalOpen = ref(false)
+
+function handleDelete(todo) {
+  deleteTarget.value = todo
+  isDeleteModalOpen.value = true
+}
+
+async function confirmDelete() {
+  if (deleteTarget.value) {
+    await todoStore.removeTodo(deleteTarget.value.id)
+    deleteTarget.value = null
   }
 }
+
+const deleteMessage = computed(() =>
+  deleteTarget.value ? `Delete "${deleteTarget.value.title}"? This can't be undone.` : '',
+)
 
 const isCategoryModalOpen = ref(false)
 
@@ -119,7 +133,7 @@ function exportCsv() {
     <div class="mx-auto max-w-2xl">
       <AppHeader />
       <main class="space-y-4 p-4">
-        <div class="flex flex-wrap items-end justify-between gap-3">
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <TodoFilterBar v-model:filters="filters" :categories="categoryStore.categories" />
           <div class="flex flex-wrap gap-2">
             <BaseButton variant="secondary" @click="isCategoryModalOpen = true">Manage categories</BaseButton>
@@ -173,6 +187,14 @@ function exportCsv() {
       <BaseModal v-model="isCategoryModalOpen" title="Manage categories">
         <CategoryManager @changed="todoStore.fetchTodos" />
       </BaseModal>
+
+      <ConfirmDialog
+        v-model="isDeleteModalOpen"
+        title="Delete todo"
+        :message="deleteMessage"
+        confirm-label="Delete"
+        @confirm="confirmDelete"
+      />
     </div>
   </div>
 </template>
