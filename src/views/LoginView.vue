@@ -32,7 +32,7 @@ async function handleSubmit() {
     <DarkModeToggle class="absolute right-4 top-4" />
     <form class="w-full max-w-sm space-y-4" @submit.prevent="handleSubmit">
       <div class="flex justify-center">
-        <AppLogo />
+        <AppLogo :size="48" />
       </div>
       <h1 class="text-center text-xl font-semibold text-slate-900 dark:text-slate-100">Log in</h1>
       <BaseInput v-model="email" type="email" label="Email" required />
