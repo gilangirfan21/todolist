@@ -1,6 +1,6 @@
 import { formatDate, weekRange } from './date'
 
-export function dailyCompletions(todos, days = 14) {
+export function dailyCompletions(todos, days = 10) {
   const buckets = []
   const today = new Date()
   for (let i = days - 1; i >= 0; i--) {
@@ -19,7 +19,7 @@ export function dailyCompletions(todos, days = 14) {
   return buckets
 }
 
-export function weeklyCompletions(todos, weeks = 8) {
+export function weeklyCompletions(todos, weeks = 10) {
   const buckets = []
   for (let i = weeks - 1; i >= 0; i--) {
     const d = new Date()

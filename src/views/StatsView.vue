@@ -5,6 +5,7 @@ import { useCategoryStore } from '../stores/categories'
 import AppHeader from '../components/layout/AppHeader.vue'
 import BarChart from '../components/stats/BarChart.vue'
 import CollapsibleSection from '../components/stats/CollapsibleSection.vue'
+import ChartTypeToggle from '../components/stats/ChartTypeToggle.vue'
 import BaseSelect from '../components/ui/BaseSelect.vue'
 import {
   dailyCompletions,
@@ -24,6 +25,8 @@ onMounted(() => {
 
 const categoryId = ref('all')
 const metricMode = ref('count')
+const dailyChartType = ref('bar')
+const weeklyChartType = ref('bar')
 
 const categoryOptions = computed(() => [
   { value: 'all', label: 'All categories' },
@@ -77,32 +80,46 @@ function toWeightData(buckets) {
           />
         </div>
 
-        <CollapsibleSection title="Selesai per hari (14 hari terakhir)" :default-open="true">
+        <CollapsibleSection title="Selesai per hari (10 hari terakhir)" :default-open="true">
+          <div class="flex justify-end">
+            <ChartTypeToggle v-model="dailyChartType" />
+          </div>
           <template v-if="metricMode === 'both'">
             <div class="space-y-1">
               <p class="text-xs text-slate-500 dark:text-slate-400">Jumlah task</p>
-              <BarChart :data="toCountData(daily)" />
+              <BarChart :data="toCountData(daily)" :type="dailyChartType" />
             </div>
             <div class="space-y-1">
               <p class="text-xs text-slate-500 dark:text-slate-400">Total bobot</p>
-              <BarChart :data="toWeightData(daily)" />
+              <BarChart :data="toWeightData(daily)" :type="dailyChartType" />
             </div>
           </template>
-          <BarChart v-else :data="metricMode === 'weight' ? toWeightData(daily) : toCountData(daily)" />
+          <BarChart
+            v-else
+            :data="metricMode === 'weight' ? toWeightData(daily) : toCountData(daily)"
+            :type="dailyChartType"
+          />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Selesai per minggu (8 minggu terakhir)">
+        <CollapsibleSection title="Selesai per minggu (10 minggu terakhir)">
+          <div class="flex justify-end">
+            <ChartTypeToggle v-model="weeklyChartType" />
+          </div>
           <template v-if="metricMode === 'both'">
             <div class="space-y-1">
               <p class="text-xs text-slate-500 dark:text-slate-400">Jumlah task</p>
-              <BarChart :data="toCountData(weekly)" />
+              <BarChart :data="toCountData(weekly)" :type="weeklyChartType" />
             </div>
             <div class="space-y-1">
               <p class="text-xs text-slate-500 dark:text-slate-400">Total bobot</p>
-              <BarChart :data="toWeightData(weekly)" />
+              <BarChart :data="toWeightData(weekly)" :type="weeklyChartType" />
             </div>
           </template>
-          <BarChart v-else :data="metricMode === 'weight' ? toWeightData(weekly) : toCountData(weekly)" />
+          <BarChart
+            v-else
+            :data="metricMode === 'weight' ? toWeightData(weekly) : toCountData(weekly)"
+            :type="weeklyChartType"
+          />
         </CollapsibleSection>
 
         <CollapsibleSection title="Completion rate per kategori">
