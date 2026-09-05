@@ -28,6 +28,13 @@ async function handleSignOut() {
       </RouterLink>
 
       <div class="ml-auto flex items-center gap-1">
+        <RouterLink
+          :to="{ name: 'stats' }"
+          class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-400"
+          aria-label="Statistik produktivitas"
+        >
+          <BaseIcon name="chart-bar" size="md" />
+        </RouterLink>
         <DarkModeToggle />
 
         <div class="relative">
@@ -49,7 +56,7 @@ async function handleSignOut() {
             </p>
             <a
               href="https://gilangirfan21.github.io/superapp/"
-              class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800"
+              class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
               @click="menuOpen = false"
             >
               <BaseIcon name="external-link" size="sm" /> SuperApp

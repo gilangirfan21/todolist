@@ -26,6 +26,7 @@ export const useTodoStore = defineStore('todos', () => {
       : 0
     const created = await todoService.createTodo({ ...todo, position })
     todos.value.push(created)
+    return created
   }
 
   async function editTodo(id, changes) {

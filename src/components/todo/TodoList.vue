@@ -6,8 +6,19 @@ import TodoItem from './TodoItem.vue'
 const props = defineProps({
   todos: { type: Array, required: true },
   reorderable: { type: Boolean, default: false },
+  getSubtasks: { type: Function, default: () => [] },
 })
-const emit = defineEmits(['toggle', 'edit', 'delete', 'reorder'])
+const emit = defineEmits([
+  'toggle',
+  'edit',
+  'delete',
+  'reorder',
+  'add-subtask',
+  'toggle-subtask',
+  'delete-subtask',
+  'rename-subtask',
+  'reorder-subtasks',
+])
 
 const localTodos = computed({
   get: () => props.todos,
@@ -26,6 +37,7 @@ const localTodos = computed({
     tag="ul"
     class="space-y-2"
     :disabled="!reorderable"
+    handle=".todo-drag-handle"
     :delay="150"
     :delay-on-touch-only="true"
     :touch-start-threshold="5"
@@ -33,9 +45,16 @@ const localTodos = computed({
     <template #item="{ element }">
       <TodoItem
         :todo="element"
+        :subtasks="getSubtasks(element.id)"
+        :reorderable="reorderable"
         @toggle="$emit('toggle', $event)"
         @edit="$emit('edit', $event)"
         @delete="$emit('delete', $event)"
+        @add-subtask="(...args) => $emit('add-subtask', ...args)"
+        @toggle-subtask="$emit('toggle-subtask', $event)"
+        @delete-subtask="$emit('delete-subtask', $event)"
+        @rename-subtask="(...args) => $emit('rename-subtask', ...args)"
+        @reorder-subtasks="(...args) => $emit('reorder-subtasks', ...args)"
       />
     </template>
   </draggable>

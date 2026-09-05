@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useTodoStore } from '../stores/todos'
 import { useCategoryStore } from '../stores/categories'
+import { useSubtaskStore } from '../stores/subtasks'
 import AppHeader from '../components/layout/AppHeader.vue'
 import TodoFilterBar from '../components/todo/TodoFilterBar.vue'
 import TodoList from '../components/todo/TodoList.vue'
@@ -15,10 +16,12 @@ import { todosToCsv, downloadCsv } from '../lib/csv'
 
 const todoStore = useTodoStore()
 const categoryStore = useCategoryStore()
+const subtaskStore = useSubtaskStore()
 
 onMounted(() => {
   todoStore.fetchTodos()
   categoryStore.fetchCategories()
+  subtaskStore.fetchSubtasks()
 })
 
 const filters = ref({
@@ -92,13 +95,20 @@ function openEditModal(todo) {
   isModalOpen.value = true
 }
 
-async function handleSubmit(payload) {
+async function handleSubmit(payload, subtaskTitles = []) {
   if (editingTodo.value) {
     await todoStore.editTodo(editingTodo.value.id, payload)
   } else {
-    await todoStore.addTodo(payload)
+    const created = await todoStore.addTodo(payload)
+    for (const title of subtaskTitles) {
+      await subtaskStore.addSubtask(created.id, title)
+    }
   }
   isModalOpen.value = false
+}
+
+function handleAddSubtask(todo, title) {
+  subtaskStore.addSubtask(todo.id, title)
 }
 
 const deleteTarget = ref(null)
@@ -112,6 +122,7 @@ function handleDelete(todo) {
 async function confirmDelete() {
   if (deleteTarget.value) {
     await todoStore.removeTodo(deleteTarget.value.id)
+    subtaskStore.removeForTodo(deleteTarget.value.id)
     deleteTarget.value = null
   }
 }
@@ -148,10 +159,16 @@ function exportCsv() {
           <TodoList
             :todos="activeTodos"
             :reorderable="isReorderable"
+            :get-subtasks="subtaskStore.byTodoId"
             @toggle="todoStore.toggleDone"
             @edit="openEditModal"
             @delete="handleDelete"
             @reorder="todoStore.reorder"
+            @add-subtask="handleAddSubtask"
+            @toggle-subtask="subtaskStore.toggleSubtask"
+            @delete-subtask="(subtask) => subtaskStore.removeSubtask(subtask.id)"
+            @rename-subtask="subtaskStore.editSubtask"
+            @reorder-subtasks="subtaskStore.reorder"
           />
           <div v-if="doneTodos.length" class="flex items-center gap-3 pt-2">
             <span class="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
@@ -164,19 +181,31 @@ function exportCsv() {
             v-if="doneTodos.length"
             :todos="doneTodos"
             :reorderable="false"
+            :get-subtasks="subtaskStore.byTodoId"
             @toggle="todoStore.toggleDone"
             @edit="openEditModal"
             @delete="handleDelete"
+            @add-subtask="handleAddSubtask"
+            @toggle-subtask="subtaskStore.toggleSubtask"
+            @delete-subtask="(subtask) => subtaskStore.removeSubtask(subtask.id)"
+            @rename-subtask="subtaskStore.editSubtask"
+            @reorder-subtasks="subtaskStore.reorder"
           />
         </template>
         <TodoList
           v-else
           :todos="filteredTodos"
           :reorderable="isReorderable"
+          :get-subtasks="subtaskStore.byTodoId"
           @toggle="todoStore.toggleDone"
           @edit="openEditModal"
           @delete="handleDelete"
           @reorder="todoStore.reorder"
+          @add-subtask="handleAddSubtask"
+          @toggle-subtask="subtaskStore.toggleSubtask"
+          @delete-subtask="(subtask) => subtaskStore.removeSubtask(subtask.id)"
+          @rename-subtask="subtaskStore.editSubtask"
+          @reorder-subtasks="subtaskStore.reorder"
         />
       </main>
 
