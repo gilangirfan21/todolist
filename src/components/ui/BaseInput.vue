@@ -49,7 +49,7 @@ function step(delta) {
         :required="required"
         :min="min"
         :max="max"
-        inputmode="numeric"
+        :inputmode="type === 'number' ? 'numeric' : undefined"
         @input="handleInput"
         class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         :class="type === 'number' ? 'appearance-none pr-8 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none' : ''"

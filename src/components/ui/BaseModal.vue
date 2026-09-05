@@ -12,8 +12,8 @@ defineEmits(['update:modelValue'])
   <Teleport to="body">
     <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/50" @click="$emit('update:modelValue', false)" />
-      <div class="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-900">
-        <div class="mb-4 flex items-center justify-between">
+      <div class="relative flex max-h-[85vh] w-full max-w-md flex-col rounded-lg bg-white shadow-xl dark:bg-slate-900">
+        <div class="flex items-center justify-between p-6 pb-4">
           <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ title }}</h2>
           <button
             type="button"
@@ -24,7 +24,9 @@ defineEmits(['update:modelValue'])
             <BaseIcon name="x" />
           </button>
         </div>
-        <slot />
+        <div class="overflow-y-auto px-6 pb-6">
+          <slot />
+        </div>
       </div>
     </div>
   </Teleport>
