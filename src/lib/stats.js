@@ -47,8 +47,8 @@ export function onTimeRate(todos) {
     else late++
   }
   return [
-    { label: 'Tepat waktu', value: onTime, color: 'emerald' },
-    { label: 'Telat', value: late, color: 'red' },
+    { label: 'On time', value: onTime, color: 'emerald' },
+    { label: 'Late', value: late, color: 'red' },
   ]
 }
 

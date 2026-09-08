@@ -69,6 +69,8 @@ const filteredTodos = computed(() => {
     result = [...result].sort((a, b) => ((a.due_date ?? '9999') > (b.due_date ?? '9999') ? 1 : -1))
   } else if (sortBy === 'priority') {
     result = [...result].sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority])
+  } else if (sortBy === 'weight') {
+    result = [...result].sort((a, b) => (b.weight ?? 1) - (a.weight ?? 1))
   } else if (sortBy === 'created_at') {
     result = [...result].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   } else {

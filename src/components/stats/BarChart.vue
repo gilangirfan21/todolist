@@ -86,7 +86,7 @@ const hHeight = computed(() => Math.max(H_ROW_HEIGHT, props.data.length * H_ROW_
 
 <template>
   <p v-if="!hasData" class="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-    Belum ada data untuk ditampilkan.
+    No data to display yet.
   </p>
 
   <svg

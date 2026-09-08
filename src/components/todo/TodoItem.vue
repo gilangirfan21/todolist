@@ -84,7 +84,7 @@ function submitRename(subtask) {
 
 <template>
   <li
-    class="flex items-start gap-3 rounded-md border border-slate-200 p-3 dark:border-slate-800"
+    class="flex flex-wrap items-start gap-3 rounded-md border border-slate-200 p-3 dark:border-slate-800"
     :class="{ 'opacity-60': todo.is_done }"
   >
     <button
@@ -121,7 +121,7 @@ function submitRename(subtask) {
           v-if="completionTiming"
           :class="completionTiming.onTime ? 'text-emerald-600 dark:text-emerald-400' : 'font-medium text-red-600 dark:text-red-400'"
         >
-          {{ completionTiming.onTime ? 'Tepat waktu' : `Telat ${completionTiming.daysLate} hari` }}
+          {{ completionTiming.onTime ? 'On time' : `Late ${completionTiming.daysLate} day${completionTiming.daysLate === 1 ? '' : 's'}` }}
         </span>
         <CategoryBadge :category="todo.category" />
         <button
@@ -137,71 +137,6 @@ function submitRename(subtask) {
             :class="{ 'rotate-180': isExpanded }"
           />
         </button>
-      </div>
-
-      <div v-if="isExpanded" class="mt-2 space-y-1.5 border-t border-slate-100 pt-2 dark:border-slate-800">
-        <draggable
-          v-model="localSubtasks"
-          item-key="id"
-          tag="div"
-          class="space-y-1.5"
-          handle=".subtask-drag-handle"
-          :delay="150"
-          :delay-on-touch-only="true"
-          :touch-start-threshold="5"
-        >
-          <template #item="{ element: subtask }">
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                class="subtask-drag-handle cursor-grab text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                aria-label="Reorder subtask"
-              >
-                <BaseIcon name="grip-vertical" size="sm" />
-              </button>
-              <BaseCheckbox
-                :model-value="subtask.is_done"
-                @update:model-value="$emit('toggle-subtask', subtask)"
-              />
-              <input
-                v-if="editingSubtaskId === subtask.id"
-                v-model="editingTitle"
-                autofocus
-                class="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                @keydown.enter="submitRename(subtask)"
-                @keydown.escape="cancelRename"
-                @blur="submitRename(subtask)"
-              />
-              <span
-                v-else
-                class="flex-1 truncate text-sm text-slate-700 dark:text-slate-300"
-                :class="{ 'text-slate-400 line-through dark:text-slate-500': subtask.is_done }"
-              >
-                {{ subtask.title }}
-              </span>
-              <button
-                v-if="editingSubtaskId !== subtask.id"
-                type="button"
-                class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-                aria-label="Rename subtask"
-                @click="startRename(subtask)"
-              >
-                <BaseIcon name="pencil" size="sm" />
-              </button>
-              <button
-                type="button"
-                class="text-slate-400 hover:text-red-600 dark:hover:text-red-400"
-                aria-label="Delete subtask"
-                @click="$emit('delete-subtask', subtask)"
-              >
-                <BaseIcon name="x" size="sm" />
-              </button>
-            </div>
-          </template>
-        </draggable>
-        <form class="flex items-center gap-2 pt-1" @submit.prevent="submitNewSubtask">
-          <BaseInput v-model="newSubtaskTitle" placeholder="Add a subtask…" class="flex-1" />
-        </form>
       </div>
     </div>
     <div class="flex gap-3">
@@ -221,6 +156,75 @@ function submitRename(subtask) {
       >
         <BaseIcon name="x-circle" size="lg" />
       </button>
+    </div>
+
+    <div
+      v-if="isExpanded"
+      class="mt-2 w-full basis-full space-y-1.5 border-t border-slate-100 pt-2 dark:border-slate-800"
+      :class="reorderable ? 'pl-7' : ''"
+    >
+      <draggable
+        v-model="localSubtasks"
+        item-key="id"
+        tag="div"
+        class="space-y-1.5"
+        handle=".subtask-drag-handle"
+        :delay="150"
+        :delay-on-touch-only="true"
+        :touch-start-threshold="5"
+      >
+        <template #item="{ element: subtask }">
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="subtask-drag-handle cursor-grab text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              aria-label="Reorder subtask"
+            >
+              <BaseIcon name="grip-vertical" size="sm" />
+            </button>
+            <BaseCheckbox
+              :model-value="subtask.is_done"
+              @update:model-value="$emit('toggle-subtask', subtask)"
+            />
+            <input
+              v-if="editingSubtaskId === subtask.id"
+              v-model="editingTitle"
+              autofocus
+              class="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              @keydown.enter="submitRename(subtask)"
+              @keydown.escape="cancelRename"
+              @blur="submitRename(subtask)"
+            />
+            <span
+              v-else
+              class="flex-1 truncate text-sm text-slate-700 dark:text-slate-300"
+              :class="{ 'text-slate-400 line-through dark:text-slate-500': subtask.is_done }"
+            >
+              {{ subtask.title }}
+            </span>
+            <button
+              v-if="editingSubtaskId !== subtask.id"
+              type="button"
+              class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+              aria-label="Rename subtask"
+              @click="startRename(subtask)"
+            >
+              <BaseIcon name="pencil" size="sm" />
+            </button>
+            <button
+              type="button"
+              class="text-slate-400 hover:text-red-600 dark:hover:text-red-400"
+              aria-label="Delete subtask"
+              @click="$emit('delete-subtask', subtask)"
+            >
+              <BaseIcon name="x" size="sm" />
+            </button>
+          </div>
+        </template>
+      </draggable>
+      <form class="flex items-center gap-2 pt-1" @submit.prevent="submitNewSubtask">
+        <BaseInput v-model="newSubtaskTitle" placeholder="Add a subtask…" class="flex-1" />
+      </form>
     </div>
   </li>
 </template>

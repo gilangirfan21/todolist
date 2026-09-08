@@ -27,6 +27,7 @@ const sortOptions = [
   { value: 'position', label: 'Manual order' },
   { value: 'due_date', label: 'Due date' },
   { value: 'priority', label: 'Priority' },
+  { value: 'weight', label: 'Weight' },
   { value: 'created_at', label: 'Date created' },
 ]
 const dateRangeOptions = [

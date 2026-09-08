@@ -33,9 +33,9 @@ const categoryOptions = computed(() => [
   ...categoryStore.categories.map((c) => ({ value: c.id, label: c.name })),
 ])
 const metricOptions = [
-  { value: 'count', label: 'Jumlah task selesai' },
-  { value: 'weight', label: 'Total bobot' },
-  { value: 'both', label: 'Keduanya' },
+  { value: 'count', label: 'Completed task count' },
+  { value: 'weight', label: 'Total weight' },
+  { value: 'both', label: 'Both' },
 ]
 
 const filteredTodos = computed(() =>
@@ -63,7 +63,7 @@ function toWeightData(buckets) {
     <div class="mx-auto max-w-2xl">
       <AppHeader />
       <main class="space-y-8 p-4">
-        <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Statistik produktivitas</h1>
+        <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Productivity stats</h1>
 
         <div class="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
           <BaseSelect
@@ -80,17 +80,17 @@ function toWeightData(buckets) {
           />
         </div>
 
-        <CollapsibleSection title="Selesai per hari (10 hari terakhir)" :default-open="true">
+        <CollapsibleSection title="Completed per day (last 10 days)" :default-open="true">
           <div class="flex justify-end">
             <ChartTypeToggle v-model="dailyChartType" />
           </div>
           <template v-if="metricMode === 'both'">
             <div class="space-y-1">
-              <p class="text-xs text-slate-500 dark:text-slate-400">Jumlah task</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Task count</p>
               <BarChart :data="toCountData(daily)" :type="dailyChartType" />
             </div>
             <div class="space-y-1">
-              <p class="text-xs text-slate-500 dark:text-slate-400">Total bobot</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Total weight</p>
               <BarChart :data="toWeightData(daily)" :type="dailyChartType" />
             </div>
           </template>
@@ -101,17 +101,17 @@ function toWeightData(buckets) {
           />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Selesai per minggu (10 minggu terakhir)">
+        <CollapsibleSection title="Completed per week (last 10 weeks)">
           <div class="flex justify-end">
             <ChartTypeToggle v-model="weeklyChartType" />
           </div>
           <template v-if="metricMode === 'both'">
             <div class="space-y-1">
-              <p class="text-xs text-slate-500 dark:text-slate-400">Jumlah task</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Task count</p>
               <BarChart :data="toCountData(weekly)" :type="weeklyChartType" />
             </div>
             <div class="space-y-1">
-              <p class="text-xs text-slate-500 dark:text-slate-400">Total bobot</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Total weight</p>
               <BarChart :data="toWeightData(weekly)" :type="weeklyChartType" />
             </div>
           </template>
@@ -122,15 +122,15 @@ function toWeightData(buckets) {
           />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Completion rate per kategori">
+        <CollapsibleSection title="Completion rate per category">
           <BarChart :data="byCategory" orientation="horizontal" value-suffix="%" />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Tepat waktu vs telat">
+        <CollapsibleSection title="On time vs late">
           <BarChart :data="onTime" orientation="horizontal" />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Ketepatan waktu per kategori">
+        <CollapsibleSection title="On-time rate per category">
           <BarChart :data="onTimeByCategory" orientation="horizontal" value-suffix="%" />
         </CollapsibleSection>
       </main>

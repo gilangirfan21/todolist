@@ -31,7 +31,7 @@ async function handleSignOut() {
         <RouterLink
           :to="{ name: 'stats' }"
           class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-400"
-          aria-label="Statistik produktivitas"
+          aria-label="Productivity stats"
         >
           <BaseIcon name="chart-bar" size="md" />
         </RouterLink>
@@ -41,7 +41,7 @@ async function handleSignOut() {
           <button
             type="button"
             class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white"
-            aria-label="Menu akun"
+            aria-label="Account menu"
             @click="menuOpen = !menuOpen"
           >
             {{ (auth.user?.email ?? '?').charAt(0).toUpperCase() }}
@@ -66,7 +66,7 @@ async function handleSignOut() {
               class="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-slate-100 dark:text-red-400 dark:hover:bg-slate-800"
               @click="handleSignOut"
             >
-              <BaseIcon name="logout" size="sm" /> Keluar
+              <BaseIcon name="logout" size="sm" /> Sign out
             </button>
           </div>
         </div>
