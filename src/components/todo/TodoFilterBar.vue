@@ -95,7 +95,7 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 
 <template>
   <div class="flex flex-col gap-3">
-    <div class="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
+    <div class="grid grid-cols-2 items-end gap-3 sm:flex sm:flex-wrap">
       <BaseSelect
         v-if="isOpen('priority')"
         class="w-full sm:w-auto"
