@@ -12,7 +12,7 @@ const props = defineProps({
   reorderable: { type: Boolean, default: false },
 })
 const emit = defineEmits([
-  'toggle',
+  'status-change',
   'edit',
   'delete',
   'add-subtask',
@@ -33,9 +33,17 @@ const priorityColor = {
   low: 'text-slate-500 dark:text-slate-400',
 }
 
+function toggleDone() {
+  emit('status-change', props.todo, props.todo.status === 'done' ? 'active' : 'done')
+}
+
+function toggleReview() {
+  emit('status-change', props.todo, props.todo.status === 'review' ? 'active' : 'review')
+}
+
 const isOverdue = computed(
   () =>
-    !props.todo.is_done &&
+    props.todo.status !== 'done' &&
     props.todo.due_date &&
     new Date(props.todo.due_date) < new Date(new Date().toDateString()),
 )
@@ -44,7 +52,7 @@ const doneCount = computed(() => props.subtasks.filter((s) => s.is_done).length)
 
 const completionTiming = computed(() => {
   const t = props.todo
-  if (!t.is_done || !t.due_date || !t.completed_date) return null
+  if (t.status !== 'done' || !t.due_date || !t.completed_date) return null
   if (t.completed_date <= t.due_date) return { onTime: true }
   const daysLate = Math.round((new Date(t.completed_date) - new Date(t.due_date)) / 86400000)
   return { onTime: false, daysLate }
@@ -85,7 +93,7 @@ function submitRename(subtask) {
 <template>
   <li
     class="flex flex-wrap items-start gap-3 rounded-md border border-slate-200 p-3 dark:border-slate-800"
-    :class="{ 'opacity-60': todo.is_done }"
+    :class="{ 'opacity-60': todo.status === 'done' }"
   >
     <button
       v-if="reorderable"
@@ -95,11 +103,16 @@ function submitRename(subtask) {
     >
       <BaseIcon name="grip-vertical" size="sm" />
     </button>
-    <BaseCheckbox class="mt-1" :model-value="todo.is_done" @update:model-value="$emit('toggle', todo)" />
+    <BaseCheckbox
+      class="mt-1"
+      :model-value="todo.status === 'done'"
+      :title="todo.status === 'done' ? 'Mark active' : 'Mark done'"
+      @update:model-value="toggleDone"
+    />
     <div class="min-w-0 flex-1">
       <p
         class="truncate font-medium text-slate-900 dark:text-slate-100"
-        :class="{ 'line-through': todo.is_done }"
+        :class="{ 'line-through': todo.status === 'done' }"
       >
         {{ todo.title }}
       </p>
@@ -107,6 +120,12 @@ function submitRename(subtask) {
         {{ todo.description }}
       </p>
       <div class="mt-1 flex flex-wrap items-center gap-2 text-xs">
+        <span
+          v-if="todo.status === 'review'"
+          class="rounded-full bg-amber-100 px-1.5 py-0.5 font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+        >
+          Review
+        </span>
         <span :class="priorityColor[todo.priority]">{{ todo.priority }}</span>
         <span
           v-if="todo.due_date"
@@ -114,7 +133,7 @@ function submitRename(subtask) {
         >
           Due {{ todo.due_date }}
         </span>
-        <span v-if="todo.is_done && todo.completed_date" class="text-slate-500 dark:text-slate-400">
+        <span v-if="todo.status === 'done' && todo.completed_date" class="text-slate-500 dark:text-slate-400">
           Completed {{ todo.completed_date }}
         </span>
         <span
@@ -140,6 +159,16 @@ function submitRename(subtask) {
       </div>
     </div>
     <div class="flex gap-3">
+      <button
+        type="button"
+        class="text-slate-400 hover:text-amber-600 dark:hover:text-amber-400"
+        :class="{ 'text-amber-500 dark:text-amber-400': todo.status === 'review' }"
+        :aria-label="todo.status === 'review' ? 'Remove from review' : 'Mark for review'"
+        :title="todo.status === 'review' ? 'Remove from review' : 'Mark for review'"
+        @click="toggleReview"
+      >
+        <BaseIcon name="eye" size="lg" />
+      </button>
       <button
         type="button"
         class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"

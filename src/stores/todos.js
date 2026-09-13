@@ -40,9 +40,11 @@ export const useTodoStore = defineStore('todos', () => {
     todos.value = todos.value.filter((t) => t.id !== id)
   }
 
-  async function toggleDone(todo) {
-    const is_done = !todo.is_done
-    await editTodo(todo.id, { is_done, completed_date: is_done ? todayStr() : null })
+  async function setStatus(todo, status) {
+    const changes = { status }
+    if (status === 'done') changes.completed_date = todayStr()
+    else if (todo.status === 'done') changes.completed_date = null
+    await editTodo(todo.id, changes)
   }
 
   async function reorder(orderedIds) {
@@ -54,5 +56,5 @@ export const useTodoStore = defineStore('todos', () => {
     await todoService.reorderTodos(items)
   }
 
-  return { todos, loading, error, fetchTodos, addTodo, editTodo, removeTodo, toggleDone, reorder }
+  return { todos, loading, error, fetchTodos, addTodo, editTodo, removeTodo, setStatus, reorder }
 })

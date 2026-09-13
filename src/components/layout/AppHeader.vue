@@ -54,6 +54,20 @@ async function handleSignOut() {
             <p class="truncate border-b border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-slate-800">
               {{ auth.user?.email }}
             </p>
+            <RouterLink
+              :to="{ name: 'categories' }"
+              class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+              @click="menuOpen = false"
+            >
+              <BaseIcon name="tag" size="sm" /> Manage categories
+            </RouterLink>
+            <RouterLink
+              :to="{ name: 'report' }"
+              class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+              @click="menuOpen = false"
+            >
+              <BaseIcon name="document-text" size="sm" /> Report
+            </RouterLink>
             <a
               href="https://gilangirfan21.github.io/superapp/"
               class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"

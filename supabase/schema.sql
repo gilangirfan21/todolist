@@ -14,7 +14,7 @@ create table if not exists todos (
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   title text not null,
   description text,
-  is_done boolean not null default false,
+  status text not null default 'active' check (status in ('active', 'review', 'done')),
   completed_date date,
   priority text not null default 'medium' check (priority in ('low', 'medium', 'high')),
   due_date date,

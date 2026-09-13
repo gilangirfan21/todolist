@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import BaseInput from '../ui/BaseInput.vue'
+import BaseDatePicker from '../ui/BaseDatePicker.vue'
 import BaseSelect from '../ui/BaseSelect.vue'
 import BaseButton from '../ui/BaseButton.vue'
 import BaseIcon from '../icons/BaseIcon.vue'
@@ -29,7 +30,7 @@ watch(
     priority.value = todo?.priority ?? 'medium'
     dueDate.value = todo ? (todo.due_date ?? '') : todayStr()
     categoryId.value = todo?.category_id ?? ''
-    completedDate.value = todo?.is_done ? (todo.completed_date ?? todayStr()) : ''
+    completedDate.value = todo?.status === 'done' ? (todo.completed_date ?? todayStr()) : ''
     weight.value = todo?.weight ?? 1
     subtaskTitles.value = ['']
   },
@@ -65,7 +66,7 @@ function handleSubmit() {
     category_id: categoryId.value || null,
     weight: Math.min(10, Math.max(1, parseInt(weight.value, 10) || 1)),
   }
-  if (props.todo?.is_done) {
+  if (props.todo?.status === 'done') {
     payload.completed_date = completedDate.value || null
   }
   const subtasks = subtaskTitles.value.map((t) => t.trim()).filter(Boolean)
@@ -79,7 +80,7 @@ function handleSubmit() {
     <BaseInput v-model="description" label="Description" placeholder="Optional details" />
     <div class="grid grid-cols-2 gap-3">
       <BaseSelect v-model="priority" label="Priority" :options="priorityOptions" />
-      <BaseInput v-model="dueDate" type="date" label="Due date" />
+      <BaseDatePicker v-model="dueDate" label="Due date" />
     </div>
     <BaseInput
       v-model="weight"
@@ -95,7 +96,7 @@ function handleSubmit() {
       label="Category"
       :options="[{ value: '', label: 'None' }, ...categories.map((c) => ({ value: c.id, label: c.name }))]"
     />
-    <BaseInput v-if="todo?.is_done" v-model="completedDate" type="date" label="Completed date" />
+    <BaseDatePicker v-if="todo?.status === 'done'" v-model="completedDate" label="Completed date" />
 
     <div v-if="!todo" class="space-y-2">
       <span class="block text-sm font-medium text-slate-700 dark:text-slate-300">

@@ -7,3 +7,39 @@ body,
 #app {
   height: 100%;
 }
+
+html,
+body {
+  background-color: #ffffff;
+}
+
+html.dark,
+html.dark body {
+  background-color: #020617;
+}
+
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dark .thin-scrollbar {
+  scrollbar-color: #475569 transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.dark .thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #475569;
+}

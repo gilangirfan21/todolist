@@ -7,12 +7,10 @@ import AppHeader from '../components/layout/AppHeader.vue'
 import TodoFilterBar from '../components/todo/TodoFilterBar.vue'
 import TodoList from '../components/todo/TodoList.vue'
 import TodoForm from '../components/todo/TodoForm.vue'
-import CategoryManager from '../components/todo/CategoryManager.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import ConfirmDialog from '../components/ui/ConfirmDialog.vue'
-import { todayStr, weekRange, monthRange } from '../lib/date'
-import { todosToCsv, downloadCsv } from '../lib/csv'
+import { useFilteredTodos } from '../composables/useFilteredTodos'
 
 const todoStore = useTodoStore()
 const categoryStore = useCategoryStore()
@@ -32,57 +30,18 @@ const filters = ref({
   dateRange: 'all',
   customStart: '',
   customEnd: '',
+  completedRange: 'all',
+  completedCustomStart: '',
+  completedCustomEnd: '',
 })
 
-const priorityRank = { high: 0, medium: 1, low: 2 }
-
-const dateRangeBounds = computed(() => {
-  const dr = filters.value.dateRange
-  if (dr === 'daily') {
-    const t = todayStr()
-    return { start: t, end: t }
-  }
-  if (dr === 'weekly') return weekRange()
-  if (dr === 'monthly') return monthRange()
-  if (dr === 'custom') {
-    if (!filters.value.customStart || !filters.value.customEnd) return null
-    return { start: filters.value.customStart, end: filters.value.customEnd }
-  }
-  return null
-})
-
-const filteredTodos = computed(() => {
-  const range = dateRangeBounds.value
-  let result = todoStore.todos.filter((t) => {
-    if (filters.value.status === 'active' && t.is_done) return false
-    if (filters.value.status === 'done' && !t.is_done) return false
-    if (filters.value.priority !== 'all' && t.priority !== filters.value.priority) return false
-    if (filters.value.categoryId !== 'all' && t.category_id !== filters.value.categoryId) return false
-    if (range) {
-      if (!t.due_date || t.due_date < range.start || t.due_date > range.end) return false
-    }
-    return true
-  })
-
-  const sortBy = filters.value.sortBy
-  if (sortBy === 'due_date') {
-    result = [...result].sort((a, b) => ((a.due_date ?? '9999') > (b.due_date ?? '9999') ? 1 : -1))
-  } else if (sortBy === 'priority') {
-    result = [...result].sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority])
-  } else if (sortBy === 'weight') {
-    result = [...result].sort((a, b) => (b.weight ?? 1) - (a.weight ?? 1))
-  } else if (sortBy === 'created_at') {
-    result = [...result].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-  } else {
-    result = [...result].sort((a, b) => a.position - b.position)
-  }
-  return result
-})
+const filteredTodos = useFilteredTodos(() => todoStore.todos, filters)
 
 const isReorderable = computed(() => filters.value.sortBy === 'position' && filters.value.status === 'all')
 const showSplit = computed(() => filters.value.status === 'all')
-const activeTodos = computed(() => filteredTodos.value.filter((t) => !t.is_done))
-const doneTodos = computed(() => filteredTodos.value.filter((t) => t.is_done))
+const activeTodos = computed(() => filteredTodos.value.filter((t) => t.status === 'active'))
+const reviewTodos = computed(() => filteredTodos.value.filter((t) => t.status === 'review'))
+const doneTodos = computed(() => filteredTodos.value.filter((t) => t.status === 'done'))
 
 const isModalOpen = ref(false)
 const editingTodo = ref(null)
@@ -132,13 +91,6 @@ async function confirmDelete() {
 const deleteMessage = computed(() =>
   deleteTarget.value ? `Delete "${deleteTarget.value.title}"? This can't be undone.` : '',
 )
-
-const isCategoryModalOpen = ref(false)
-
-function exportCsv() {
-  const csv = todosToCsv(filteredTodos.value)
-  downloadCsv(`todos-${todayStr()}.csv`, csv)
-}
 </script>
 
 <template>
@@ -146,12 +98,10 @@ function exportCsv() {
     <div class="mx-auto max-w-2xl">
       <AppHeader />
       <main class="space-y-4 p-4">
-        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div class="flex flex-col gap-3">
           <TodoFilterBar v-model:filters="filters" :categories="categoryStore.categories" />
-          <div class="flex flex-wrap gap-2">
-            <BaseButton variant="secondary" @click="isCategoryModalOpen = true">Manage categories</BaseButton>
-            <BaseButton variant="secondary" @click="exportCsv">Export CSV</BaseButton>
-            <BaseButton @click="openCreateModal">+ New</BaseButton>
+          <div class="flex justify-end">
+            <BaseButton class="min-w-24" @click="openCreateModal">+ New</BaseButton>
           </div>
         </div>
 
@@ -162,10 +112,31 @@ function exportCsv() {
             :todos="activeTodos"
             :reorderable="isReorderable"
             :get-subtasks="subtaskStore.byTodoId"
-            @toggle="todoStore.toggleDone"
+            @status-change="todoStore.setStatus"
             @edit="openEditModal"
             @delete="handleDelete"
             @reorder="todoStore.reorder"
+            @add-subtask="handleAddSubtask"
+            @toggle-subtask="subtaskStore.toggleSubtask"
+            @delete-subtask="(subtask) => subtaskStore.removeSubtask(subtask.id)"
+            @rename-subtask="subtaskStore.editSubtask"
+            @reorder-subtasks="subtaskStore.reorder"
+          />
+          <div v-if="reviewTodos.length" class="flex items-center gap-3 pt-2">
+            <span class="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+            <span class="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              Review ({{ reviewTodos.length }})
+            </span>
+            <span class="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+          </div>
+          <TodoList
+            v-if="reviewTodos.length"
+            :todos="reviewTodos"
+            :reorderable="false"
+            :get-subtasks="subtaskStore.byTodoId"
+            @status-change="todoStore.setStatus"
+            @edit="openEditModal"
+            @delete="handleDelete"
             @add-subtask="handleAddSubtask"
             @toggle-subtask="subtaskStore.toggleSubtask"
             @delete-subtask="(subtask) => subtaskStore.removeSubtask(subtask.id)"
@@ -184,7 +155,7 @@ function exportCsv() {
             :todos="doneTodos"
             :reorderable="false"
             :get-subtasks="subtaskStore.byTodoId"
-            @toggle="todoStore.toggleDone"
+            @status-change="todoStore.setStatus"
             @edit="openEditModal"
             @delete="handleDelete"
             @add-subtask="handleAddSubtask"
@@ -199,7 +170,7 @@ function exportCsv() {
           :todos="filteredTodos"
           :reorderable="isReorderable"
           :get-subtasks="subtaskStore.byTodoId"
-          @toggle="todoStore.toggleDone"
+          @status-change="todoStore.setStatus"
           @edit="openEditModal"
           @delete="handleDelete"
           @reorder="todoStore.reorder"
@@ -213,10 +184,6 @@ function exportCsv() {
 
       <BaseModal v-model="isModalOpen" :title="editingTodo ? 'Edit todo' : 'New todo'">
         <TodoForm :todo="editingTodo" :categories="categoryStore.categories" @submit="handleSubmit" @cancel="isModalOpen = false" />
-      </BaseModal>
-
-      <BaseModal v-model="isCategoryModalOpen" title="Manage categories">
-        <CategoryManager @changed="todoStore.fetchTodos" />
       </BaseModal>
 
       <ConfirmDialog

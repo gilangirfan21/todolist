@@ -9,7 +9,7 @@ const props = defineProps({
   getSubtasks: { type: Function, default: () => [] },
 })
 const emit = defineEmits([
-  'toggle',
+  'status-change',
   'edit',
   'delete',
   'reorder',
@@ -47,7 +47,7 @@ const localTodos = computed({
         :todo="element"
         :subtasks="getSubtasks(element.id)"
         :reorderable="reorderable"
-        @toggle="$emit('toggle', $event)"
+        @status-change="(...args) => $emit('status-change', ...args)"
         @edit="$emit('edit', $event)"
         @delete="$emit('delete', $event)"
         @add-subtask="(...args) => $emit('add-subtask', ...args)"

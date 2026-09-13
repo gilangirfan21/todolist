@@ -24,7 +24,7 @@ defineEmits(['update:modelValue'])
             <BaseIcon name="x" />
           </button>
         </div>
-        <div class="overflow-y-auto px-6 pb-6">
+        <div class="thin-scrollbar overflow-y-auto px-6 pb-6">
           <slot />
         </div>
       </div>

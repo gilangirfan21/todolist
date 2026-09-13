@@ -10,7 +10,7 @@ export function dailyCompletions(todos, days = 10) {
   }
   const indexByLabel = new Map(buckets.map((b, i) => [b.label, i]))
   for (const t of todos) {
-    if (t.is_done && t.completed_date && indexByLabel.has(t.completed_date)) {
+    if (t.status === 'done' && t.completed_date && indexByLabel.has(t.completed_date)) {
       const bucket = buckets[indexByLabel.get(t.completed_date)]
       bucket.count++
       bucket.weight += t.weight ?? 1
@@ -28,7 +28,7 @@ export function weeklyCompletions(todos, weeks = 10) {
     buckets.push({ label: start, start, end, count: 0, weight: 0 })
   }
   for (const t of todos) {
-    if (!t.is_done || !t.completed_date) continue
+    if (t.status !== 'done' || !t.completed_date) continue
     const bucket = buckets.find((b) => t.completed_date >= b.start && t.completed_date <= b.end)
     if (bucket) {
       bucket.count++
@@ -42,7 +42,7 @@ export function onTimeRate(todos) {
   let onTime = 0
   let late = 0
   for (const t of todos) {
-    if (!t.is_done || !t.due_date || !t.completed_date) continue
+    if (t.status !== 'done' || !t.due_date || !t.completed_date) continue
     if (t.completed_date <= t.due_date) onTime++
     else late++
   }
@@ -58,7 +58,7 @@ export function onTimeRateByCategory(todos, categories) {
   for (const c of categories) groups.set(c.id, { label: c.name, onTime: 0, late: 0 })
 
   for (const t of todos) {
-    if (!t.is_done || !t.due_date || !t.completed_date) continue
+    if (t.status !== 'done' || !t.due_date || !t.completed_date) continue
     const group = groups.get(t.category_id ?? null)
     if (!group) continue
     if (t.completed_date <= t.due_date) group.onTime++
@@ -80,7 +80,7 @@ export function categoryCompletionRates(todos, categories) {
     const group = groups.get(t.category_id ?? null)
     if (!group) continue
     group.total++
-    if (t.is_done) group.done++
+    if (t.status === 'done') group.done++
   }
 
   return [...groups.values()]

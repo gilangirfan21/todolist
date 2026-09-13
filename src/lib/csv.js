@@ -17,10 +17,11 @@ export function todosToCsv(todos) {
     'Category',
     'Created at',
   ]
+  const statusLabel = { active: 'Active', review: 'Review', done: 'Done' }
   const rows = todos.map((t) => [
     t.title,
     t.description ?? '',
-    t.is_done ? 'Done' : 'Active',
+    statusLabel[t.status] ?? t.status,
     t.priority,
     t.due_date ?? '',
     t.completed_date ?? '',

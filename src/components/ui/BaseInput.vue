@@ -51,7 +51,7 @@ function step(delta) {
         :max="max"
         :inputmode="type === 'number' ? 'numeric' : undefined"
         @input="handleInput"
-        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm transition-colors duration-150 placeholder:text-slate-400 hover:border-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:shadow-none dark:hover:border-slate-600 dark:scheme-dark"
         :class="type === 'number' ? 'appearance-none pr-8 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none' : ''"
       />
       <span v-if="type === 'number'" class="absolute inset-y-0 right-0 flex w-7 flex-col divide-y divide-slate-200 border-l border-slate-200 dark:divide-slate-700 dark:border-slate-700">

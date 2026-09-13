@@ -24,3 +24,17 @@ export function monthRange(date = new Date()) {
   const end = new Date(date.getFullYear(), date.getMonth() + 1, 0)
   return { start: formatDate(start), end: formatDate(end) }
 }
+
+export function resolveDateRange(range, customStart, customEnd) {
+  if (range === 'daily') {
+    const t = todayStr()
+    return { start: t, end: t }
+  }
+  if (range === 'weekly') return weekRange()
+  if (range === 'monthly') return monthRange()
+  if (range === 'custom') {
+    if (!customStart || !customEnd) return null
+    return { start: customStart, end: customEnd }
+  }
+  return null
+}
