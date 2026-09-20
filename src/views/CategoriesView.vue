@@ -10,6 +10,8 @@ const categoryStore = useCategoryStore()
 
 onMounted(() => {
   if (!categoryStore.categories.length) categoryStore.fetchCategories()
+  // CategoryManager counts todos to guard the secret category from deletion
+  if (!todoStore.todos.length) todoStore.fetchTodos()
 })
 </script>
 

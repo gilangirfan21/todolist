@@ -1,12 +1,25 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import * as todoService from '../services/todoService'
 import { todayStr } from '../lib/date'
+import { useCategoryStore } from './categories'
+import { useSecretStore } from './secret'
 
 export const useTodoStore = defineStore('todos', () => {
+  const categoryStore = useCategoryStore()
+  const secret = useSecretStore()
+
   const todos = ref([])
   const loading = ref(false)
   const error = ref(null)
+
+  // Single choke point for secret mode — every view reads this, never `todos`.
+  const visibleTodos = computed(() => {
+    // Until categories load, secret is indistinguishable from normal — show nothing.
+    if (!categoryStore.loaded) return []
+    const secretId = categoryStore.secretCategory?.id ?? null
+    return todos.value.filter((t) => (secretId !== null && t.category_id === secretId) === secret.enabled)
+  })
 
   async function fetchTodos() {
     loading.value = true
@@ -56,5 +69,5 @@ export const useTodoStore = defineStore('todos', () => {
     await todoService.reorderTodos(items)
   }
 
-  return { todos, loading, error, fetchTodos, addTodo, editTodo, removeTodo, setStatus, reorder }
+  return { todos, visibleTodos, loading, error, fetchTodos, addTodo, editTodo, removeTodo, setStatus, reorder }
 })

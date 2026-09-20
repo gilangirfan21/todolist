@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useTodoStore } from '../stores/todos'
 import { useCategoryStore } from '../stores/categories'
 import { useSubtaskStore } from '../stores/subtasks'
+import { useSecretStore } from '../stores/secret'
 import AppHeader from '../components/layout/AppHeader.vue'
 import TodoFilterBar from '../components/todo/TodoFilterBar.vue'
 import TodoList from '../components/todo/TodoList.vue'
@@ -15,6 +16,7 @@ import { useFilteredTodos } from '../composables/useFilteredTodos'
 const todoStore = useTodoStore()
 const categoryStore = useCategoryStore()
 const subtaskStore = useSubtaskStore()
+const secret = useSecretStore()
 
 onMounted(() => {
   todoStore.fetchTodos()
@@ -35,7 +37,15 @@ const filters = ref({
   completedCustomEnd: '',
 })
 
-const filteredTodos = useFilteredTodos(() => todoStore.todos, filters)
+// A category id from the other mode would leave the list permanently empty.
+watch(
+  () => secret.enabled,
+  () => {
+    filters.value = { ...filters.value, categoryId: 'all' }
+  },
+)
+
+const filteredTodos = useFilteredTodos(() => todoStore.visibleTodos, filters)
 
 const isReorderable = computed(() => filters.value.sortBy === 'position' && filters.value.status === 'all')
 const showSplit = computed(() => filters.value.status === 'all')
@@ -99,7 +109,7 @@ const deleteMessage = computed(() =>
       <AppHeader />
       <main class="space-y-4 p-4">
         <div class="flex flex-col gap-3">
-          <TodoFilterBar v-model:filters="filters" :categories="categoryStore.categories" />
+          <TodoFilterBar v-model:filters="filters" :categories="categoryStore.visibleCategories" />
           <div class="flex justify-end">
             <BaseButton class="min-w-24" @click="openCreateModal">+ New</BaseButton>
           </div>
@@ -183,7 +193,13 @@ const deleteMessage = computed(() =>
       </main>
 
       <BaseModal v-model="isModalOpen" :title="editingTodo ? 'Edit todo' : 'New todo'">
-        <TodoForm :todo="editingTodo" :categories="categoryStore.categories" @submit="handleSubmit" @cancel="isModalOpen = false" />
+        <TodoForm
+          :todo="editingTodo"
+          :categories="categoryStore.visibleCategories"
+          :default-category-id="categoryStore.defaultCategoryId"
+          @submit="handleSubmit"
+          @cancel="isModalOpen = false"
+        />
       </BaseModal>
 
       <ConfirmDialog

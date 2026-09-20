@@ -4,9 +4,14 @@ create table if not exists categories (
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   name text not null,
   color text,
+  is_secret boolean not null default false,
   created_at timestamptz not null default now(),
   unique (user_id, name)
 );
+
+-- At most one secret category per user
+create unique index if not exists categories_one_secret_per_user_idx
+  on categories (user_id) where is_secret;
 
 -- Todos
 create table if not exists todos (

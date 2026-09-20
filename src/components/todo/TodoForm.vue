@@ -10,6 +10,7 @@ import { todayStr } from '../../lib/date'
 const props = defineProps({
   todo: { type: Object, default: null },
   categories: { type: Array, default: () => [] },
+  defaultCategoryId: { type: String, default: '' },
 })
 const emit = defineEmits(['submit', 'cancel'])
 
@@ -23,13 +24,13 @@ const weight = ref(1)
 const subtaskTitles = ref([''])
 
 watch(
-  () => props.todo,
-  (todo) => {
+  [() => props.todo, () => props.defaultCategoryId],
+  ([todo]) => {
     title.value = todo?.title ?? ''
     description.value = todo?.description ?? ''
     priority.value = todo?.priority ?? 'medium'
     dueDate.value = todo ? (todo.due_date ?? '') : todayStr()
-    categoryId.value = todo?.category_id ?? ''
+    categoryId.value = todo?.category_id ?? props.defaultCategoryId ?? ''
     completedDate.value = todo?.status === 'done' ? (todo.completed_date ?? todayStr()) : ''
     weight.value = todo?.weight ?? 1
     subtaskTitles.value = ['']

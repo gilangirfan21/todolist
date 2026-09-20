@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useTodoStore } from '../stores/todos'
 import { useCategoryStore } from '../stores/categories'
+import { useSecretStore } from '../stores/secret'
 import AppHeader from '../components/layout/AppHeader.vue'
 import TodoFilterBar from '../components/todo/TodoFilterBar.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
@@ -11,6 +12,7 @@ import { todosToCsv, downloadCsv } from '../lib/csv'
 
 const todoStore = useTodoStore()
 const categoryStore = useCategoryStore()
+const secret = useSecretStore()
 
 onMounted(() => {
   if (!todoStore.todos.length) todoStore.fetchTodos()
@@ -30,7 +32,15 @@ const filters = ref({
   completedCustomEnd: '',
 })
 
-const filteredTodos = useFilteredTodos(() => todoStore.todos, filters)
+// A category id from the other mode would leave the list permanently empty.
+watch(
+  () => secret.enabled,
+  () => {
+    filters.value = { ...filters.value, categoryId: 'all' }
+  },
+)
+
+const filteredTodos = useFilteredTodos(() => todoStore.visibleTodos, filters)
 
 function exportCsv() {
   const csv = todosToCsv(filteredTodos.value)
@@ -44,7 +54,7 @@ function exportCsv() {
       <AppHeader />
       <main class="space-y-4 p-4">
         <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Report</h1>
-        <TodoFilterBar v-model:filters="filters" :categories="categoryStore.categories" />
+        <TodoFilterBar v-model:filters="filters" :categories="categoryStore.visibleCategories" />
 
         <div class="flex items-center justify-between rounded-lg border border-slate-200 p-4 dark:border-slate-800">
           <p class="text-sm text-slate-600 dark:text-slate-400">

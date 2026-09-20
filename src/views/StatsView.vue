@@ -1,7 +1,8 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useTodoStore } from '../stores/todos'
 import { useCategoryStore } from '../stores/categories'
+import { useSecretStore } from '../stores/secret'
 import AppHeader from '../components/layout/AppHeader.vue'
 import BarChart from '../components/stats/BarChart.vue'
 import CollapsibleSection from '../components/stats/CollapsibleSection.vue'
@@ -17,6 +18,7 @@ import {
 
 const todoStore = useTodoStore()
 const categoryStore = useCategoryStore()
+const secret = useSecretStore()
 
 onMounted(() => {
   if (!todoStore.todos.length) todoStore.fetchTodos()
@@ -24,13 +26,14 @@ onMounted(() => {
 })
 
 const categoryId = ref('all')
+watch(() => secret.enabled, () => { categoryId.value = 'all' })
 const metricMode = ref('count')
 const dailyChartType = ref('bar')
 const weeklyChartType = ref('bar')
 
 const categoryOptions = computed(() => [
   { value: 'all', label: 'All categories' },
-  ...categoryStore.categories.map((c) => ({ value: c.id, label: c.name })),
+  ...categoryStore.visibleCategories.map((c) => ({ value: c.id, label: c.name })),
 ])
 const metricOptions = [
   { value: 'count', label: 'Completed task count' },
@@ -40,15 +43,15 @@ const metricOptions = [
 
 const filteredTodos = computed(() =>
   categoryId.value === 'all'
-    ? todoStore.todos
-    : todoStore.todos.filter((t) => t.category_id === categoryId.value),
+    ? todoStore.visibleTodos
+    : todoStore.visibleTodos.filter((t) => t.category_id === categoryId.value),
 )
 
 const daily = computed(() => dailyCompletions(filteredTodos.value))
 const weekly = computed(() => weeklyCompletions(filteredTodos.value))
-const byCategory = computed(() => categoryCompletionRates(todoStore.todos, categoryStore.categories))
+const byCategory = computed(() => categoryCompletionRates(todoStore.visibleTodos, categoryStore.visibleCategories))
 const onTime = computed(() => onTimeRate(filteredTodos.value))
-const onTimeByCategory = computed(() => onTimeRateByCategory(todoStore.todos, categoryStore.categories))
+const onTimeByCategory = computed(() => onTimeRateByCategory(todoStore.visibleTodos, categoryStore.visibleCategories))
 
 function toCountData(buckets) {
   return buckets.map((b) => ({ label: b.label, value: b.count }))
